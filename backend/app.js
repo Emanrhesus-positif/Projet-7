@@ -1,46 +1,41 @@
 const express = require('express');
 
+const bookRoutes = require('./routes/books');
+
+const authRoutes = require('./routes/auth');
+
 const app = express();
 
-app.use('/api/books', (req, res, next) => {
-  const books = [
-    {
-      userId: 'kjdhf125er',
-      title: 'le monde de jean claude',
-      author: 'Paihr Nauhell',
-      imageUrl: 'https://bourgoisediteur.fr/wp-content/uploads/2019/11/Tolkien-Le-Seigneur-des-Anneaux-broch%C3%A9.jpg',
-      year: 1000,
-      genre: 'Homme',
-      ratings: [
-        {
-          userId: 'kjdhf125er',
-          grade: 0.001,
-        },
-      ],
-      averageRating: 0,
-    },
-    {
-      userId: 'kjdhf125er',
-      title: 'le monde de van damme',
-      author: 'Nohaihr Pezz',
-      imageUrl: 'https://img.livraddict.com/covers/183/183472/couv60527719.jpg',
-      year: 1001,
-      genre: 'Femme',
-      ratings: [
-        {
-          userId: 'kjdhf125er',
-          grade: 0.002,
-        },
-      ],
-      averageRating: 1,
-    },
-  ];
-  res.status(200).json(books);
+const mongoose = require('mongoose');
+
+mongoose.connect(
+  'mongodb+srv://romainbories09:aN7Gga4OccDYubsl@cluster0.4bxggvb.mongodb.net/test?retryWrites=true&w=majority',
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  },
+)
+  .then(() => console.log('Connexion à MongoDB réussie !'))
+  .catch(() => console.log('Connexion à MongoDB échouée !'));
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   next();
+});
+app.use('/api/books', bookRoutes);
+app.use('/api/auth', authRoutes);
+app.use((req, res) => {
+  res.json({ message: 'Votre requête a bien été reçue !' });
 });
 
 module.exports = app;
 
+// User {
+//   email : String - adresse e-mail de l’utilisateur [unique]
+//   password : String - mot de passe haché de l’utilisateur
+//   }
 
 // {
 //   userId: String - identifiant MongoDB unique de l'utilisateur qui a créé le livre
@@ -57,3 +52,6 @@ module.exports = app;
 //   ]- notes données à un livre
 //   averageRating : Number - note moyenne du livre
 // },
+
+// db connect : romainbories09 aN7Gga4OccDYubsl read write
+// 0gtPL70EFfxatqMD publicuser101 read only
