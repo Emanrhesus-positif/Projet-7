@@ -2,7 +2,7 @@ const express = require('express');
 
 const bookRoutes = require('./routes/books');
 
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./routes/user');
 
 const app = express();
 

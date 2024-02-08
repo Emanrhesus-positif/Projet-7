@@ -115,7 +115,7 @@ router.put('/:id', booksCtrl.modifyBook);
 router.delete('/:id', booksCtrl.deleteBook);
 
 router.post('/:id/rating', (req, res, next) => {
-  //auth requis
+  // auth requis
   //   Définit la note pour le user ID fourni.
   // La note doit être comprise entre 0 et 5.
   // L'ID de l'utilisateur et la note doivent être ajoutés au
@@ -124,18 +124,17 @@ router.post('/:id/rating', (req, res, next) => {
   // Il n’est pas possible de modifier une note.
   // La note moyenne "averageRating" doit être tenue à
   // jour, et le livre renvoyé en réponse de la requête.
-  //Emission : Single book
-  //Reception : { userId: String, rating: Number } + token
+  // Emission : Single book
+  // Reception : { userId: String, rating: Number } + token
   next();
 });
 router.get('/bestrating', (req, res, next) => {
-  //auth non requis
-  //Renvoie un tableau des 3 livres de la base de données ayant la meilleure note moyenne.
-  //Emission : Array of books 
+  // auth non requis
+  // Renvoie un tableau des 3 livres de la base de données ayant la meilleure note moyenne.
+  // Emission : Array of books 
 
   console.log(req.body);
   res.status(201).json({ message: 'objet créé' });
   next();
 });
 module.exports = router;
-
