@@ -1,10 +1,9 @@
 const express = require('express');
-
-const router = express.Router();
-
+const auth = require('../middleware/auth');
+const multer = require('../middleware/multer-config');
 const booksCtrl = require('../controllers/books');
 
-const Book = require('../models/book');
+const router = express.Router();
 // router.get('/', (req, res, next) => {
 //   // auth non requis
 //   // Renvoie un tableau de tous les livres de la base de données.
@@ -109,12 +108,12 @@ const Book = require('../models/book');
 // });
 
 router.get('/', booksCtrl.getAllBooks);
-router.post('/', booksCtrl.createBook);
+router.post('/', auth, multer, booksCtrl.createBook);
 router.get('/:id', booksCtrl.getOneBook);
-router.put('/:id', booksCtrl.modifyBook);
-router.delete('/:id', booksCtrl.deleteBook);
+router.put('/:id', auth, booksCtrl.modifyBook);
+router.delete('/:id', auth, booksCtrl.deleteBook);
 
-router.post('/:id/rating', (req, res, next) => {
+router.post('/:id/rating', auth, (req, res, next) => {
   // auth requis
   //   Définit la note pour le user ID fourni.
   // La note doit être comprise entre 0 et 5.

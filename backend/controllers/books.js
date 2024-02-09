@@ -1,18 +1,23 @@
+/* eslint-disable no-console */
+/* eslint-disable object-shorthand */
 const Book = require('../models/book');
 
 exports.createBook = (req, res, next) => {
+  const bookObject = JSON.parse(req.body.book);
+  // eslint-disable-next-line no-underscore-dangle
+  delete bookObject._id;
+
   const book = new Book({
-    id: req.body.id,
-    title: req.body.title,
-    author: req.body.author,
-    imageUrl: req.body.imageUrl,
-    year: req.body.year,
-    genre: req.body.genre,
+    ...bookObject,
+    userId: req.auth.id,
+    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
   });
+  console.log(book);
+  console.log(book.title);
   book.save().then(
     () => {
       res.status(201).json({
-        message: 'Post saved successfully!',
+        message: 'Book saved successfully!',
       });
     },
   ).catch(
@@ -26,7 +31,7 @@ exports.createBook = (req, res, next) => {
 
 exports.getOneBook = (req, res, next) => {
   Book.findOne({
-    id: req.params.id
+    id: req.params.id,
   }).then(
     (book) => {
       res.status(200).json(book);
@@ -34,7 +39,7 @@ exports.getOneBook = (req, res, next) => {
   ).catch(
     (error) => {
       res.status(404).json({
-        error: error
+        error: error,
       });
     },
   );
@@ -49,7 +54,7 @@ exports.modifyBook = (req, res, next) => {
     year: req.body.year,
     genre: req.body.genre,
   });
-  Book.updateOne({id: req.params.id}, book).then(
+  Book.updateOne({ id: req.params.id }, book).then(
     () => {
       res.status(201).json({
         message: 'Book updated successfully!',
@@ -58,7 +63,7 @@ exports.modifyBook = (req, res, next) => {
   ).catch(
     (error) => {
       res.status(400).json({
-        error: error
+        error: error,
       });
     },
   );
@@ -74,7 +79,7 @@ exports.deleteBook = (req, res, next) => {
   ).catch(
     (error) => {
       res.status(400).json({
-        error: error
+        error: error,
       });
     },
   );
@@ -88,7 +93,7 @@ exports.getAllBooks = (req, res, next) => {
   ).catch(
     (error) => {
       res.status(400).json({
-        error: error
+        error: error,
       });
     },
   );
