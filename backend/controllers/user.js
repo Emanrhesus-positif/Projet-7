@@ -2,14 +2,11 @@ const bcrypt = require('bcrypt');
 
 const jwt = require('jsonwebtoken');
 
+require('dotenv').config();
+
 const User = require('../models/user');
 
 exports.signup = (req, res, next) => {
-  // auth non requis
-  // Hachage du mot de passe de l'utilisateur, ajout de l'utilisateur à la base de données
-  // émission : { message: string }
-  // réception : { email: string, password: string }
-
   bcrypt.hash(req.body.password, 10)
     .then((hash) => {
       const user = new User({
@@ -24,12 +21,6 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-  // auth non requis
-  // Vérification des informations d'identification de l'utilisateur puis
-  // renvoie l’_id de l'utilisateur depuis la base de données et un token
-  // web JSON signé (contenant également l'_id de l'utilisateur).
-  // Emission : { userId: string, token: string }
-  // Réception : { email: string, password: string }
   // eslint-disable-next-line no-console
   User.findOne({ email: req.body.email })
     // eslint-disable-next-line consistent-return
@@ -47,7 +38,7 @@ exports.login = (req, res, next) => {
             userId: user.id,
             token: jwt.sign(
               { userId: user.id },
-              'RANDOM_TOKEN_SECRET',
+              process.env.SECRET_KEY,
               { expiresIn: '24h' },
             ),
           });

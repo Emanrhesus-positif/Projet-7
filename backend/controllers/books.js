@@ -4,7 +4,7 @@
 const fs = require('fs');
 const Book = require('../models/book');
 
-exports.createBook = (req, res, next) => {
+exports.createBook = (req, res) => {
   const bookObject = JSON.parse(req.body.book);
   // eslint-disable-next-line no-underscore-dangle
   delete bookObject._id;
@@ -16,7 +16,7 @@ exports.createBook = (req, res, next) => {
   book.save().then(
     () => {
       res.status(201).json({
-        message: 'Book saved successfully!',
+        message: 'Livre sauvegardé',
       });
     },
   ).catch(
@@ -27,7 +27,7 @@ exports.createBook = (req, res, next) => {
     },
   );
 };
-exports.getOneBook = (req, res, next) => {
+exports.getOneBook = (req, res) => {
   Book.findOne({
     _id: req.params.id,
   }).then(
@@ -42,7 +42,7 @@ exports.getOneBook = (req, res, next) => {
     },
   );
 };
-exports.modifyBook = (req, res, next) => {
+exports.modifyBook = (req, res) => {
   const bookObject = req.file ? {
     ...JSON.parse(req.body.book),
     imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
@@ -52,22 +52,25 @@ exports.modifyBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
       if (book.userId !== req.auth.userId) {
-        res.status(401).json({ message: 'Not authorized' });
+        res.status(401).json({ message: 'Non autorisé' });
       } else {
-        Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
-          .then(() => res.status(200).json({ message: 'Livre modifié!' }))
-          .catch((error) => res.status(401).json({ error }));
+        const filename = book.imageUrl.split('/images/')[1];
+        fs.unlink(`images/${filename}`, () => {
+          Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
+            .then(() => res.status(200).json({ message: 'Livre modifié!' }))
+            .catch((error) => res.status(401).json({ error }));
+        });
       }
     })
     .catch((error) => {
       res.status(400).json({ error });
     });
 };
-exports.deleteBook = (req, res, next) => {
+exports.deleteBook = (req, res) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
       if (book.userId !== req.auth.userId) {
-        res.status(401).json({ message: 'Not authorized' });
+        res.status(401).json({ message: 'Non autorisé' });
       } else {
         const filename = book.imageUrl.split('/images/')[1];
         fs.unlink(`images/${filename}`, () => {
@@ -82,7 +85,7 @@ exports.deleteBook = (req, res, next) => {
     });
 };
 
-exports.getAllBooks = (req, res, next) => {
+exports.getAllBooks = (req, res) => {
   Book.find().then(
     (books) => {
       res.status(200).json(books);
@@ -96,7 +99,7 @@ exports.getAllBooks = (req, res, next) => {
   );
 };
 
-exports.rateABook = (req, res, next) => {
+exports.rateABook = (req, res) => {
   const rating = req.body;
   if (rating < 0 || rating > 5) {
     return res.status(400).json({ error: "Erreur sur le classement"});
@@ -119,7 +122,7 @@ exports.rateABook = (req, res, next) => {
   }).then((updatedBook) => {
     res.status(200).json(updatedBook);
   }).catch((error) => {
-    res.status(500).json({ error: "Probleme sur le rating" });
+    res.status(500).json({ error: 'Probleme sur le rating'});
   });
 };
 
@@ -129,30 +132,6 @@ exports.getBestBooks = (req, res, next) => {
       res.status(200).json(books);
     })
     .catch(error => {
-      res.status(500).json({ error: "Probleme sur la recuperation des meilleurs livres" });
+      res.status(500).json({ error: 'Probleme sur la recuperation des meilleurs livres '});
     });
 };
-
-// router.post('/:id/rating', auth, (req, res, next) => {
-//   // auth requis
-//   //   Définit la note pour le user ID fourni.
-//   // La note doit être comprise entre 0 et 5.
-//   // L'ID de l'utilisateur et la note doivent être ajoutés au
-//   // tableau "rating" afin de ne pas laisser un utilisateur
-//   // noter deux fois le même livre.
-//   // Il n’est pas possible de modifier une note.
-//   // La note moyenne "averageRating" doit être tenue à
-//   // jour, et le livre renvoyé en réponse de la requête.
-//   // Emission : Single book
-//   // Reception : { userId: String, rating: Number } + token
-// 
-// });
-// router.get('/bestrating', (req, res, next) => {
-//   // auth non requis
-//   // Renvoie un tableau des 3 livres de la base de données ayant la meilleure note moyenne.
-//   // Emission : Array of books 
-
-//   console.log(req.body);
-//   res.status(201).json({ message: 'objet créé' });
-// 
-// });

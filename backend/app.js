@@ -7,9 +7,6 @@ const authRoutes = require('./routes/user');
 
 const app = express();
 
-// express.static();
-// path.join();
-
 mongoose.connect(
   'mongodb+srv://romainbories09:aN7Gga4OccDYubsl@cluster0.4bxggvb.mongodb.net/test?retryWrites=true&w=majority',
   {
@@ -39,6 +36,3 @@ app.use((req, res) => {
 });
 
 module.exports = app;
-
-// db connect : romainbories09 aN7Gga4OccDYubsl read write
-// 0gtPL70EFfxatqMD publicuser101 read only
