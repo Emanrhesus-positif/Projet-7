@@ -27,13 +27,11 @@ exports.createBook = (req, res, next) => {
     },
   );
 };
-
 exports.getOneBook = (req, res, next) => {
   Book.findOne({
     _id: req.params.id,
   }).then(
     (book) => {
-      console.log(book);
       res.status(200).json(book);
     },
   ).catch(
@@ -44,7 +42,6 @@ exports.getOneBook = (req, res, next) => {
     },
   );
 };
-
 exports.modifyBook = (req, res, next) => {
   const bookObject = req.file ? {
     ...JSON.parse(req.body.book),
@@ -66,7 +63,6 @@ exports.modifyBook = (req, res, next) => {
       res.status(400).json({ error });
     });
 };
-
 exports.deleteBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
@@ -89,7 +85,6 @@ exports.deleteBook = (req, res, next) => {
 exports.getAllBooks = (req, res, next) => {
   Book.find().then(
     (books) => {
-      console.log(books);
       res.status(200).json(books);
     },
   ).catch(
@@ -100,3 +95,64 @@ exports.getAllBooks = (req, res, next) => {
     },
   );
 };
+
+exports.rateABook = (req, res, next) => {
+  const rating = req.body;
+  if (rating < 0 || rating > 5) {
+    return res.status(400).json({ error: "Erreur sur le classement"});
+  }
+  Book.findOne({
+    _id: req.params.id,
+  }).then((book) => {
+    const existingRatingIndex = book.ratings.findIndex(rating => rating.userId === req.body.userId);
+    if (existingRatingIndex !== -1) {
+      book.ratings[existingRatingIndex].grade = req.body.rating;
+    } else {
+      book.ratings.push({ userId: req.body.userId, grade: req.body.rating });
+    }
+    const totalRatings = book.ratings.length;
+
+    const totalGrade = book.ratings.reduce((acc, current) => acc + current.grade, 0);
+    const final = totalGrade / totalRatings;
+    book.averageRating = final.toFixed(2);
+    return book.save();
+  }).then((updatedBook) => {
+    res.status(200).json(updatedBook);
+  }).catch((error) => {
+    res.status(500).json({ error: "Probleme sur le rating" });
+  });
+};
+
+exports.getBestBooks = (req, res, next) => {
+  Book.find().sort({ averageRating: -1 }).limit(3)
+    .then(books => {
+      res.status(200).json(books);
+    })
+    .catch(error => {
+      res.status(500).json({ error: "Probleme sur la recuperation des meilleurs livres" });
+    });
+};
+
+// router.post('/:id/rating', auth, (req, res, next) => {
+//   // auth requis
+//   //   Définit la note pour le user ID fourni.
+//   // La note doit être comprise entre 0 et 5.
+//   // L'ID de l'utilisateur et la note doivent être ajoutés au
+//   // tableau "rating" afin de ne pas laisser un utilisateur
+//   // noter deux fois le même livre.
+//   // Il n’est pas possible de modifier une note.
+//   // La note moyenne "averageRating" doit être tenue à
+//   // jour, et le livre renvoyé en réponse de la requête.
+//   // Emission : Single book
+//   // Reception : { userId: String, rating: Number } + token
+// 
+// });
+// router.get('/bestrating', (req, res, next) => {
+//   // auth non requis
+//   // Renvoie un tableau des 3 livres de la base de données ayant la meilleure note moyenne.
+//   // Emission : Array of books 
+
+//   console.log(req.body);
+//   res.status(201).json({ message: 'objet créé' });
+// 
+// });
