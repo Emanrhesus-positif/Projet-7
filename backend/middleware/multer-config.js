@@ -1,21 +1,29 @@
 const multer = require('multer');
+const SharpMulter = require('sharp-multer');
 
-const MIME_TYPES = {
-  'image/jpg': 'jpg',
-  'image/jpeg': 'jpg',
-  'image/png': 'png',
+const options = {
+  fileFormat: 'webp',
+  quality: 60,
+  resize: { width: 338, height: 600 },
+  useTimestamp: true,
 };
 
-const storage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, 'images');
-  },
-  filename: (req, file, callback) => {
-    const name = file.originalname.split(' ').join('_');
-    const extension = MIME_TYPES[file.mimetype];
-    callback(null, `${name + Date.now()}.${extension}`);
-  },
+const newFilenameFunction = (ogFilename, options, req) => {
+  const timestamp = options.useTimestamp ? `${Date.now()}` : '';
+  const finalname = `upload_${timestamp}.${options.fileFormat}`;
+  return finalname;
+};
+
+const storage = SharpMulter({
+  destination: (req, file, callback) => callback(null, 'images'),
+  imageOptions: options,
+  filename: newFilenameFunction,
 });
 
-// eslint-disable-next-line object-shorthand
-module.exports = multer({ storage: storage }).single('image');
+const upload = multer({ storage });
+
+const uploadMiddleware = (req, res, next) => {
+  upload.single('image')(req, res, next);
+};
+
+module.exports = uploadMiddleware;
