@@ -8,7 +8,7 @@ const options = {
   useTimestamp: true,
 };
 
-const newFilenameFunction = (ogFilename, options, req) => {
+const newFilename = (ogFilename, options, req) => {
   const timestamp = options.useTimestamp ? `${Date.now()}` : '';
   const finalname = `upload_${timestamp}.${options.fileFormat}`;
   return finalname;
@@ -17,7 +17,7 @@ const newFilenameFunction = (ogFilename, options, req) => {
 const storage = SharpMulter({
   destination: (req, file, callback) => callback(null, 'images'),
   imageOptions: options,
-  filename: newFilenameFunction,
+  filename: newFilename,
 });
 
 const upload = multer({ storage });
